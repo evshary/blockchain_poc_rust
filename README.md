@@ -1,18 +1,8 @@
-# Repository
+# BlockChain POC in Rust
 
-TODO: Remember to update the following files for your onwn needs
-
-* `.pre-commit-config.yaml`
-* `.gitignore`
-* `.github`: CI related
+This is a simple POC for blockchain concept in Rust.
 
 ## Usage
-
-* Install prerequisite.sh
-
-```shell
-./prerequisite.sh
-```
 
 * Install pre-commit
 
