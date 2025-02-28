@@ -1,10 +1,10 @@
 mod account;
 mod blockchain;
+mod connection;
 
 use account::Account;
 use blockchain::Blockchain;
-
-// TODO: Create protobuf for command
+use connection::Connection;
 
 struct Node {
     _ip: String,
@@ -47,20 +47,6 @@ impl Node {
     }
 }
 
-// TODO: struct we need
-// Connection
-//  - connect
-//  - send
-//  - send(command)
-//  - recv(commnad)
-//  - peer_list
-//  - transfer
-//  - get_peer
-// Consensus
-//  - calculate
-//  - verify
-//  - adjust difficulties
-
 fn main() {
     println!("Hello, world!");
     // TODO: Able to parse CLI commands
@@ -78,6 +64,8 @@ fn main() {
     // TODO: Create/Read account
     let _account = Account::create("myaccount".to_string());
     let _account = Account::load("myaccount".to_string());
+    // TODO: Initialize the connection and put it into Node
+    let _connection = Connection::new();
     // Mining
     let mut node = Node::new();
     // TODO: How to run listening, keep_alive and mining

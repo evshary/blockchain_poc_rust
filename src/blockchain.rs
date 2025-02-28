@@ -1,3 +1,9 @@
+// TODO: struct we need
+// Consensus
+//  - calculate
+//  - verify
+//  - adjust difficulties
+
 pub struct Transaction {
     _sender: String,
     _receiver: String,
