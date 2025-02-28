@@ -1,5 +1,7 @@
+mod account;
 mod blockchain;
 
+use account::Account;
 use blockchain::{Block, Blockchain};
 
 // TODO: Create protobuf for command
@@ -39,9 +41,6 @@ impl Node {
 }
 
 // TODO: struct we need
-// Blockchain
-// Block
-// Transaction
 // Connection
 //  - connect
 //  - send
@@ -54,7 +53,6 @@ impl Node {
 //  - calculate
 //  - verify
 //  - adjust difficulties
-// Account
 // Node
 //  - create listener
 //    - receive get_peer => get it from Connection => send back
@@ -79,6 +77,11 @@ fn main() {
     // Mining (need account)
     //   1. run Node
     //   2. run Minor
+
+    // TODO: Create/Read account
+    let _account = Account::create("myaccount".to_string());
+    let _account = Account::load("myaccount".to_string());
+    // Mining
     let node = Node::new();
     node.mining();
 }
