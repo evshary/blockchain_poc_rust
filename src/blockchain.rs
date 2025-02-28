@@ -26,12 +26,6 @@ impl Block {
             _transactions: transactions,
         }
     }
-
-    pub fn get_hash(&self) -> String {
-        let _hash_input = format!("{}{}{}", self.timestamp, self.prev_hash, self.nonce,);
-        // TODO: Covert Block into hash
-        String::new()
-    }
 }
 
 pub struct Blockchain {
@@ -43,14 +37,15 @@ pub struct Blockchain {
 
 impl Blockchain {
     pub fn new() -> Blockchain {
+        let consensus = Consensus::new();
         // Create the genesis block
         let mut genesis_block = Block::new(String::from("Genesis Block Message"), vec![]);
-        genesis_block.hash = genesis_block.get_hash();
+        genesis_block.hash = consensus.get_hash(&genesis_block);
         Blockchain {
             _blocks: vec![genesis_block],
             _pending_transactions: Vec::new(),
             _mining_reward: 0,
-            consensus: Consensus::new(),
+            consensus,
         }
     }
 
