@@ -1,8 +1,4 @@
-// TODO: struct we need
-// Consensus
-//  - calculate
-//  - verify
-//  - adjust difficulties
+use crate::consensus::Consensus;
 
 pub struct Transaction {
     _sender: String,
@@ -42,6 +38,7 @@ pub struct Blockchain {
     pub _blocks: Vec<Block>,
     pub _pending_transactions: Vec<Transaction>,
     pub _mining_reward: u64,
+    pub consensus: Consensus,
 }
 
 impl Blockchain {
@@ -53,6 +50,7 @@ impl Blockchain {
             _blocks: vec![genesis_block],
             _pending_transactions: Vec::new(),
             _mining_reward: 0,
+            consensus: Consensus::new(),
         }
     }
 
@@ -64,6 +62,7 @@ impl Blockchain {
         // TODO: Create a new block
         // TODO: Put the transaction into it
         // TODO: Calculate the hash
+        self.consensus.calculate();
         // TODO: Add to the blockchain
     }
 }

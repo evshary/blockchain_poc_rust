@@ -1,6 +1,7 @@
 mod account;
 mod blockchain;
 mod connection;
+mod consensus;
 
 use account::Account;
 use blockchain::Blockchain;
