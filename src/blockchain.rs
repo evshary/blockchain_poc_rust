@@ -37,3 +37,27 @@ pub struct Blockchain {
     pub _pending_transactions: Vec<Transaction>,
     pub _mining_reward: u64,
 }
+
+impl Blockchain {
+    pub fn new() -> Blockchain {
+        // Create the genesis block
+        let mut genesis_block = Block::new(String::from("Genesis Block Message"), vec![]);
+        genesis_block.hash = genesis_block.get_hash();
+        Blockchain {
+            _blocks: vec![genesis_block],
+            _pending_transactions: Vec::new(),
+            _mining_reward: 0,
+        }
+    }
+
+    pub fn synchronize(&mut self) {
+        // TODO: Update the blockchain based on consensus
+    }
+
+    pub fn mining(&mut self) {
+        // TODO: Create a new block
+        // TODO: Put the transaction into it
+        // TODO: Calculate the hash
+        // TODO: Add to the blockchain
+    }
+}

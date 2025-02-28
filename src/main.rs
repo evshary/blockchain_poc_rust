@@ -2,7 +2,7 @@ mod account;
 mod blockchain;
 
 use account::Account;
-use blockchain::{Block, Blockchain};
+use blockchain::Blockchain;
 
 // TODO: Create protobuf for command
 
@@ -10,32 +10,39 @@ struct Node {
     _ip: String,
     _port: u16,
     _account: String,
-    _blockchain: Blockchain,
+    blockchain: Blockchain,
 }
 
 impl Node {
     fn new() -> Node {
-        // Create the genesis block
-        let mut genesis_block = Block::new(String::from("Genesis Block Message"), vec![]);
-        genesis_block.hash = genesis_block.get_hash();
         Node {
             _ip: String::from("127.0.0.1"),
             _port: 8080,
             _account: String::from(""),
-            _blockchain: Blockchain {
-                _blocks: vec![genesis_block],
-                _pending_transactions: Vec::new(),
-                _mining_reward: 0,
-            },
+            blockchain: Blockchain::new(),
         }
     }
 
-    fn mining(&self) {
+    fn listening(&mut self) {
+        // TODO: Listen from other peers
+        //    - receive get_peer => get it from Connection => send back
+        //    - get balance => get it from Blockchain => send back
+        //    - send_transaction => Verify (Consensus) => transfer
+        //    - download => get it from Blockchain => send back
+        //    - get_blockdata => Deal with divergence
+        self.blockchain.synchronize();
+    }
+
+    fn keep_alive(&self) {
+        // TODO: Check connection and also sync the blockchain
+        //  - send getblockdata periodically
+    }
+
+    fn mining(&mut self) {
         loop {
-            // TODO: Create a new block
-            // TODO: Put the transaction into it
-            // TODO: Calculate the hash
-            // TODO: Add to the blockchain
+            // TODO: Mining
+            //  - do the mining (get data from mempool, calculate, and update blockchain)
+            self.blockchain.mining();
         }
     }
 }
@@ -53,16 +60,6 @@ impl Node {
 //  - calculate
 //  - verify
 //  - adjust difficulties
-// Node
-//  - create listener
-//    - receive get_peer => get it from Connection => send back
-//    - get balance => get it from Blockchain => send back
-//    - send_transaction => Verify (Consensus) => transfer
-//    - download => get it from Blockchain => send back
-//    - get_blockdata => Deal with divergence
-//  - send getblockdata periodically
-// Miner
-//  - do the mining (get data from mempool, calculate, and update blockchain)
 
 fn main() {
     println!("Hello, world!");
@@ -82,6 +79,9 @@ fn main() {
     let _account = Account::create("myaccount".to_string());
     let _account = Account::load("myaccount".to_string());
     // Mining
-    let node = Node::new();
+    let mut node = Node::new();
+    // TODO: How to run listening, keep_alive and mining
+    node.listening();
+    node.keep_alive();
     node.mining();
 }
