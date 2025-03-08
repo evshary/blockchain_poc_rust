@@ -4,45 +4,75 @@ mod connection;
 mod consensus;
 
 use account::Account;
-use blockchain::Blockchain;
+use blockchain::{Blockchain, Transaction};
 use connection::Connection;
 
 struct Node {
-    _ip: String,
-    _port: u16,
+    connection: Connection,
     _account: String,
     blockchain: Blockchain,
+    _mempool: Vec<Transaction>,
+    _newpool: Vec<Transaction>,
 }
 
 impl Node {
     fn new() -> Node {
+        // TODO: Initialize the connection
+        let _ip = String::from("127.0.0.1");
+        let _port = 8080;
+        let connection = Connection::new();
         Node {
-            _ip: String::from("127.0.0.1"),
-            _port: 8080,
+            connection,
             _account: String::from(""),
             blockchain: Blockchain::new(),
+            _mempool: Vec::new(),
+            _newpool: Vec::new(),
         }
     }
 
     fn listening(&mut self) {
-        // TODO: Listen from other peers
-        //    - receive get_peer => get it from Connection => send back
-        //    - get balance => get it from Blockchain => send back
-        //    - send_transaction => Verify (Consensus) => transfer
-        //    - download => get it from Blockchain => send back
-        //    - get_blockdata => Deal with divergence
-        self.blockchain.synchronize();
+        // TODO: The type should be get_packet_from_queue() -> (packet, address)
+        self.connection.get_packet_from_queue();
+        /* TODO:
+          Potential type:
+          1. keep alive
+            get the transaction and put it into mempool
+            compare the length of chain => get_hash if necessary
+          2. get_hash
+            Get the hash from Blockchain => send back
+          3. reply_hash
+            Compare the hash difference
+          4. get_blockdata
+            Get the required block from Blockchain => send back
+          5. reply_blockdata
+            Lock the Blockchain
+            for old block:
+              push back to mempool
+            for new block:
+              verify the blockdata
+              remove the one in mempool
+              update the Blockchain
+          6. get_peer
+            get it from Connection => send back
+          7. get balance
+            get it from Blockchain => send back
+          8. send_transaction
+            Verify (Consensus)
+            broadcast
+            put it into newpool
+        */
     }
 
     fn keep_alive(&self) {
-        // TODO: Check connection and also sync the blockchain
-        //  - send getblockdata periodically
+        // TODO: Keepalive implementation
+        //   broadcast new_pool
+        //   Put them into mempool
     }
 
     fn mining(&mut self) {
         loop {
             // TODO: Mining
-            //  - do the mining (get data from mempool, calculate, and update blockchain)
+            //   do the mining (get data from mempool, calculate, and update blockchain)
             self.blockchain.mining();
         }
     }

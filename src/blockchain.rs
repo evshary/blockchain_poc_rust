@@ -29,8 +29,7 @@ impl Block {
 }
 
 pub struct Blockchain {
-    pub _blocks: Vec<Block>,
-    pub _pending_transactions: Vec<Transaction>,
+    pub blocks: Vec<Block>,
     pub _mining_reward: u64,
     pub consensus: Consensus,
 }
@@ -42,15 +41,26 @@ impl Blockchain {
         let mut genesis_block = Block::new(String::from("Genesis Block Message"), vec![]);
         genesis_block.hash = consensus.get_hash(&genesis_block);
         Blockchain {
-            _blocks: vec![genesis_block],
-            _pending_transactions: Vec::new(),
+            blocks: vec![genesis_block],
             _mining_reward: 0,
             consensus,
         }
     }
 
-    pub fn synchronize(&mut self) {
-        // TODO: Update the blockchain based on consensus
+    pub fn length(&self) -> usize {
+        self.blocks.len()
+    }
+
+    pub fn remove_last_block(&mut self) {
+        // TODO: need to return the transactions
+    }
+
+    pub fn add_block(&mut self, block: Block) {
+        // TODO: Verify the block
+    }
+
+    pub fn compare_hash(&self) {
+        // TODO: Return the same length of hash
     }
 
     pub fn mining(&mut self) {

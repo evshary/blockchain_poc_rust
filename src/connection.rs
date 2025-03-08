@@ -1,27 +1,43 @@
 pub struct Connection;
 
 // TODO: Create protobuf for command
-// Command Type
-// - get_balance: Send from users
-// - transaction: Send from users
-// - get_version: Keep alive with other nodes, including version and block chain length
-// - get_hash: Get the hash list from other nodes
-// - reply_hash: Reply the get_hash
-// - get_blockdata: Get the block data (different from ours) from other nodes
-// - reply_blockdata: Reply the get_blockdata
+/*
+ * Packet Type:
+ * keep_alive: version, length, new_transaction
+ * get_hash
+ * reply_hash: length, hash list
+ * get_blockdata: start number
+ * reply_blockdata: length, block data
+ * get_balance: address
+ * reply get_balance: amount
+ * transaction: Transaction struct
+ * get_peer
+ * reply get_peer: IP list
+ */
 
 impl Connection {
     pub fn new() -> Self {
+        // TODO: connect the network
         Self {}
     }
 
-    // TODO: The function we need
-    // Connection
-    //  - connect
-    //  - send
-    //  - send(command)
-    //  - recv(commnad)
-    //  - peer_list
-    //  - transfer
-    //  - get_peer
+    pub fn get_packet_from_queue(&mut self) {
+        // TODO: Pop the packets from the queue
+    }
+
+    pub fn send(&self) {
+        // TODO: Send the packet
+    }
+
+    pub fn recv(&self) {
+        // TODO: Receive the packet
+    }
+
+    pub fn get_peer_list(&self) {
+        // TODO: Get the peer list
+    }
+
+    pub fn transfer(&self) {
+        // TODO: Transfer the packet
+    }
 }
