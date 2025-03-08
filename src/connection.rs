@@ -25,18 +25,22 @@ impl Connection {
         // TODO: Pop the packets from the queue
     }
 
+    #[allow(dead_code)]
     pub fn send(&self) {
         // TODO: Send the packet
     }
 
+    #[allow(dead_code)]
     pub fn recv(&self) {
         // TODO: Receive the packet
     }
 
+    #[allow(dead_code)]
     pub fn get_peer_list(&self) {
         // TODO: Get the peer list
     }
 
+    #[allow(dead_code)]
     pub fn transfer(&self) {
         // TODO: Transfer the packet
     }

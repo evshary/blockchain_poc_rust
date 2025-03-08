@@ -47,18 +47,22 @@ impl Blockchain {
         }
     }
 
+    #[allow(dead_code)]
     pub fn length(&self) -> usize {
         self.blocks.len()
     }
 
+    #[allow(dead_code)]
     pub fn remove_last_block(&mut self) {
         // TODO: need to return the transactions
     }
 
-    pub fn add_block(&mut self, block: Block) {
+    #[allow(dead_code)]
+    pub fn add_block(&mut self, _block: Block) {
         // TODO: Verify the block
     }
 
+    #[allow(dead_code)]
     pub fn compare_hash(&self) {
         // TODO: Return the same length of hash
     }
