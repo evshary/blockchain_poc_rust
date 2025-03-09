@@ -1,5 +1,8 @@
 use crate::blockchain::Block;
 
+use bincode::serialize;
+use sha2::{Digest, Sha256};
+
 pub struct Consensus {
     _difficulty: u32,
 }
@@ -10,9 +13,14 @@ impl Consensus {
     }
 
     pub fn get_hash(&self, block: &Block) -> String {
-        let _hash_input = format!("{}{}{}", block.timestamp, block.prev_hash, block.nonce);
-        // TODO: Covert Block into hash
-        String::new()
+        let encoded: Vec<u8> = serialize(&block).unwrap();
+
+        // Sha256
+        let mut hasher = Sha256::new();
+        hasher.update(encoded);
+        let result = hasher.finalize();
+
+        format!("{:x}", result)
     }
 
     #[allow(dead_code)]
@@ -20,11 +28,18 @@ impl Consensus {
         // TODO: Verify the Blockchain
     }
 
-    pub fn calculate(&self /* TODO: BlockChain, New Block */) -> u32 {
+    pub fn calculate(&self, block: &mut Block) {
         // TODO: Check the difficulty and adjust
-        // TODO: Get the last Block hash
-        // TODO: Calculate the hash in new Block
-        // TODO: Return the nonce
-        0
+
+        // Calculate the hash
+        loop {
+            let hash = self.get_hash(&block);
+            println!("Hash: {}", hash);
+            if hash.starts_with("0") {
+                block.hash = hash;
+                break;
+            }
+            block.nonce += 1;
+        }
     }
 }

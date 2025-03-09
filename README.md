@@ -26,7 +26,7 @@ pre-commit install --install-hooks
 
 ## TODO
 
-* Able to mine
+* Adjust the difficulties
 * Use tokio
 * Add protobuf
 * Able to manage the account

@@ -80,7 +80,6 @@ impl Node {
 }
 
 fn main() {
-    println!("Hello, world!");
     // TODO: Able to parse CLI commands
     // Send command (Need IP:port)
     //   1. get balance

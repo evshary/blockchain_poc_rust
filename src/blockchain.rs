@@ -1,5 +1,10 @@
+use std::time;
+
 use crate::consensus::Consensus;
 
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Transaction {
     _sender: String,
     _receiver: String,
@@ -8,8 +13,9 @@ pub struct Transaction {
     _message: String,
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Block {
-    pub timestamp: u64,
+    pub timestamp: u128,
     pub prev_hash: String,
     pub hash: String,
     pub nonce: u64,
@@ -18,8 +24,13 @@ pub struct Block {
 
 impl Block {
     pub fn new(prev_hash: String, transactions: Vec<Transaction>) -> Block {
+        // Create timestamp
+        let timestamp = time::SystemTime::now()
+            .duration_since(time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
         Block {
-            timestamp: 0,
+            timestamp,
             prev_hash,
             hash: String::from(""),
             nonce: 0,
@@ -37,9 +48,11 @@ pub struct Blockchain {
 impl Blockchain {
     pub fn new() -> Blockchain {
         let consensus = Consensus::new();
+
         // Create the genesis block
         let mut genesis_block = Block::new(String::from("Genesis Block Message"), vec![]);
         genesis_block.hash = consensus.get_hash(&genesis_block);
+
         Blockchain {
             blocks: vec![genesis_block],
             _mining_reward: 0,
@@ -68,10 +81,18 @@ impl Blockchain {
     }
 
     pub fn mining(&mut self) {
-        // TODO: Create a new block
+        let mut block = Block::new(self.blocks.last().unwrap().hash.clone(), vec![]);
+
         // TODO: Put the transaction into it
-        // TODO: Calculate the hash
-        self.consensus.calculate();
-        // TODO: Add to the blockchain
+
+        // Calculate the hash
+        self.consensus.calculate(&mut block);
+
+        // Add to the blockchain
+        self.blocks.push(block);
+        println!("{:?}", self.blocks);
+
+        // sleep 5 seconds
+        std::thread::sleep(std::time::Duration::from_secs(5));
     }
 }
