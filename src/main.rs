@@ -73,6 +73,7 @@ impl Node {
         loop {
             // TODO: Mining
             //   do the mining (get data from mempool, calculate, and update blockchain)
+            // TODO: Need a way to lock blockchain if we want to update it while receiving longer chain
             self.blockchain.mining();
         }
     }

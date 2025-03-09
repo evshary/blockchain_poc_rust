@@ -15,7 +15,8 @@ impl Consensus {
         String::new()
     }
 
-    pub fn _verify(&self) {
+    #[allow(dead_code)]
+    pub fn verify(&self) {
         // TODO: Verify the Blockchain
     }
 

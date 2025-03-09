@@ -44,4 +44,9 @@ impl Connection {
     pub fn transfer(&self) {
         // TODO: Transfer the packet
     }
+
+    #[allow(dead_code)]
+    pub fn broadcast(&self) {
+        // TODO: Broadcast the packet
+    }
 }
