@@ -1,7 +1,7 @@
-use crate::blockchain::Block;
-
 use bincode::serialize;
 use sha2::{Digest, Sha256};
+
+use crate::blockchain::Block;
 
 pub struct Consensus {
     _difficulty: u32,
@@ -33,7 +33,7 @@ impl Consensus {
 
         // Calculate the hash
         loop {
-            let hash = self.get_hash(&block);
+            let hash = self.get_hash(block);
             println!("Hash: {}", hash);
             if hash.starts_with("0") {
                 block.hash = hash;

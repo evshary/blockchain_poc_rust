@@ -1,8 +1,8 @@
 use std::time;
 
-use crate::consensus::Consensus;
-
 use serde::{Deserialize, Serialize};
+
+use crate::consensus::Consensus;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Transaction {
