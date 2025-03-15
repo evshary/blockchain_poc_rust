@@ -81,6 +81,10 @@ impl Blockchain {
     }
 
     pub fn mining(&mut self) {
+        // Adjust the consensus
+        // TODO: Use fixed difficulty for test (4 to 5 is enough)
+        self.consensus.adjust(&mut self.blocks);
+
         let mut block = Block::new(self.blocks.last().unwrap().hash.clone(), vec![]);
 
         // TODO: Put the transaction into it
