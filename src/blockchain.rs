@@ -1,4 +1,7 @@
-use std::time;
+use std::{
+    sync::{Mutex, RwLock},
+    time,
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -6,11 +9,11 @@ use crate::consensus::Consensus;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Transaction {
-    _sender: String,
-    _receiver: String,
-    _amount: u64,
-    _fee: u64,
-    _message: String,
+    pub sender: String,
+    pub receiver: String,
+    pub amount: u64,
+    pub fee: u64,
+    pub message: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -19,7 +22,7 @@ pub struct Block {
     pub prev_hash: String,
     pub hash: String,
     pub nonce: u64,
-    _transactions: Vec<Transaction>,
+    pub transactions: Vec<Transaction>,
 }
 
 impl Block {
@@ -34,15 +37,16 @@ impl Block {
             prev_hash,
             hash: String::from(""),
             nonce: 0,
-            _transactions: transactions,
+            transactions,
         }
     }
 }
 
 pub struct Blockchain {
-    pub blocks: Vec<Block>,
+    pub blocks: RwLock<Vec<Block>>,
     pub _mining_reward: u64,
-    pub consensus: Consensus,
+    pub consensus: RwLock<Consensus>,
+    pub mempool: Mutex<Vec<Transaction>>,
 }
 
 impl Blockchain {
@@ -54,15 +58,16 @@ impl Blockchain {
         genesis_block.hash = consensus.get_hash(&genesis_block);
 
         Blockchain {
-            blocks: vec![genesis_block],
+            blocks: RwLock::new(vec![genesis_block]),
             _mining_reward: 0,
-            consensus,
+            consensus: RwLock::new(consensus),
+            mempool: Mutex::new(Vec::new()),
         }
     }
 
     #[allow(dead_code)]
     pub fn length(&self) -> usize {
-        self.blocks.len()
+        self.blocks.read().unwrap().len()
     }
 
     #[allow(dead_code)]
@@ -80,20 +85,31 @@ impl Blockchain {
         // TODO: Return the same length of hash
     }
 
-    pub fn mining(&mut self) {
+    pub fn mining(&self) {
         // Adjust the consensus
-        self.consensus.adjust(&mut self.blocks);
+        self.consensus
+            .write()
+            .unwrap()
+            .adjust(&self.blocks.read().unwrap());
 
-        let mut block = Block::new(self.blocks.last().unwrap().hash.clone(), vec![]);
+        let transactions: Vec<Transaction> = self.mempool.lock().unwrap().drain(..).collect();
+        println!("Transactions: {:?}", transactions);
+        let mut block = Block::new(
+            self.blocks.read().unwrap().last().unwrap().hash.clone(),
+            transactions,
+        );
 
         // TODO: Put the transaction into it
 
         // Calculate the hash
-        self.consensus.calculate(&mut block);
+        self.consensus.read().unwrap().calculate(&mut block);
 
         // Add to the blockchain
-        self.blocks.push(block);
-        tracing::info!("New block added: {:?}", self.blocks.last().unwrap());
+        self.blocks.write().unwrap().push(block);
+        tracing::info!(
+            "New block added: {:?}",
+            self.blocks.read().unwrap().last().unwrap()
+        );
         tracing::debug!("Blockchain: {:?}", self.blocks);
     }
 }

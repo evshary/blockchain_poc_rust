@@ -34,7 +34,7 @@ impl Consensus {
         // TODO: Verify the Blockchain
     }
 
-    pub fn adjust(&mut self, blocks: &mut [Block]) {
+    pub fn adjust(&mut self, blocks: &[Block]) {
         if TEST_MODE {
             // Fix the difficulty to 3 but sleep for 5 seconds to avoid too fast
             self.difficulty = 3;
