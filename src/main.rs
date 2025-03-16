@@ -3,12 +3,12 @@ mod blockchain;
 mod connection;
 mod consensus;
 
+use std::sync::{Arc, Mutex};
+
 use account::Account;
 use blockchain::{Blockchain, Transaction};
 use connection::Connection;
 use rand::{rngs::OsRng, TryRngCore};
-
-use std::sync::{Arc, Mutex};
 
 struct Node {
     connection: Mutex<Connection>,
