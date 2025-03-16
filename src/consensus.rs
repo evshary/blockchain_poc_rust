@@ -3,6 +3,9 @@ use sha2::{Digest, Sha256};
 
 use crate::blockchain::Block;
 
+// Enable TEST_MODE to make generating the block stably
+const TEST_MODE: bool = true;
+
 // 10 minutes = 10 * 60 * 1000 milliseconds
 const TIMESTAMP_DIFFERENCE: u128 = 600000;
 
@@ -32,6 +35,12 @@ impl Consensus {
     }
 
     pub fn adjust(&mut self, blocks: &mut [Block]) {
+        if TEST_MODE {
+            // Fix the difficulty to 3 but sleep for 5 seconds to avoid too fast
+            self.difficulty = 3;
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+
         // Check the timestamp: Only for debug
         for block in blocks.iter() {
             tracing::trace!("Timestamp: {}", block.timestamp);
