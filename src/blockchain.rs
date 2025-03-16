@@ -94,7 +94,8 @@ impl Blockchain {
 
         // Add to the blockchain
         self.blocks.push(block);
-        println!("{:?}", self.blocks);
+        tracing::info!("New block added: {:?}", self.blocks.last().unwrap());
+        tracing::debug!("Blockchain: {:?}", self.blocks);
 
         // sleep 5 seconds
         std::thread::sleep(std::time::Duration::from_secs(5));

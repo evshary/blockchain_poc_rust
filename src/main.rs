@@ -17,10 +17,13 @@ struct Node {
 
 impl Node {
     fn new() -> Node {
+        tracing::debug!("Initialize the Node");
+
         // TODO: Initialize the connection
         let _ip = String::from("127.0.0.1");
         let _port = 8080;
         let connection = Connection::new();
+
         Node {
             connection,
             _account: String::from(""),
@@ -80,6 +83,9 @@ impl Node {
 }
 
 fn main() {
+    // Initialize the logger
+    tracing_subscriber::fmt::init();
+
     // TODO: Able to parse CLI commands
     // Send command (Need IP:port)
     //   1. get balance
