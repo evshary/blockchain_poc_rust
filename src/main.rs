@@ -7,10 +7,12 @@ use account::Account;
 use blockchain::{Blockchain, Transaction};
 use connection::Connection;
 
+use std::sync::{Arc, Mutex};
+
 struct Node {
-    connection: Connection,
+    connection: Mutex<Connection>,
     _account: String,
-    blockchain: Blockchain,
+    blockchain: Mutex<Blockchain>,
     _mempool: Vec<Transaction>,
     _newpool: Vec<Transaction>,
 }
@@ -25,17 +27,17 @@ impl Node {
         let connection = Connection::new();
 
         Node {
-            connection,
+            connection: Mutex::new(connection),
             _account: String::from(""),
-            blockchain: Blockchain::new(),
+            blockchain: Mutex::new(Blockchain::new()),
             _mempool: Vec::new(),
             _newpool: Vec::new(),
         }
     }
 
-    fn listening(&mut self) {
+    async fn listening(&self) {
         // TODO: The type should be get_packet_from_queue() -> (packet, address)
-        self.connection.get_packet_from_queue();
+        self.connection.lock().unwrap().get_packet_from_queue();
         /* TODO:
           Potential type:
           1. keep alive
@@ -66,23 +68,24 @@ impl Node {
         */
     }
 
-    fn keep_alive(&self) {
+    async fn keep_alive(&self) {
         // TODO: Keepalive implementation
         //   broadcast new_pool
         //   Put them into mempool
     }
 
-    fn mining(&mut self) {
+    fn mining(&self) {
         loop {
             // TODO: Mining
             //   do the mining (get data from mempool, calculate, and update blockchain)
             // TODO: Need a way to lock blockchain if we want to update it while receiving longer chain
-            self.blockchain.mining();
+            self.blockchain.lock().unwrap().mining();
         }
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Initialize the logger
     tracing_subscriber::fmt::init();
 
@@ -103,10 +106,15 @@ fn main() {
     let _account = Account::load("myaccount".to_string());
     // TODO: Initialize the connection and put it into Node
     let _connection = Connection::new();
+
+    let node = Arc::new(Node::new());
+
+    // Listening and Keepalive
+    let listening_node = node.clone();
+    tokio::spawn(async move { listening_node.listening().await });
+    let keep_alive_node = node.clone();
+    tokio::spawn(async move { keep_alive_node.keep_alive().await });
+
     // Mining
-    let mut node = Node::new();
-    // TODO: How to run listening, keep_alive and mining
-    node.listening();
-    node.keep_alive();
     node.mining();
 }
