@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::consensus::Consensus;
 
+const TRANSACTION_PER_BLOCK: usize = 32;
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Transaction {
     pub sender: String,
@@ -71,12 +73,12 @@ impl Blockchain {
     }
 
     #[allow(dead_code)]
-    pub fn remove_last_block(&mut self) {
+    pub fn remove_last_block(&self) {
         // TODO: need to return the transactions
     }
 
     #[allow(dead_code)]
-    pub fn add_block(&mut self, _block: Block) {
+    pub fn add_block(&self, _block: Block) {
         // TODO: Verify the block
     }
 
@@ -92,14 +94,18 @@ impl Blockchain {
             .unwrap()
             .adjust(&self.blocks.read().unwrap());
 
-        let transactions: Vec<Transaction> = self.mempool.lock().unwrap().drain(..).collect();
+        // Put the transaction into it
+        // TODO: Check the balance of the sender
+        let transactions: Vec<_> = {
+            let mut lock = self.mempool.lock().unwrap();
+            let size = TRANSACTION_PER_BLOCK.min(lock.len());
+            lock.drain(..size).collect()
+        };
         println!("Transactions: {:?}", transactions);
         let mut block = Block::new(
             self.blocks.read().unwrap().last().unwrap().hash.clone(),
             transactions,
         );
-
-        // TODO: Put the transaction into it
 
         // Calculate the hash
         self.consensus.read().unwrap().calculate(&mut block);

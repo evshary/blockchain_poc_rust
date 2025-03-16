@@ -6,6 +6,7 @@ mod consensus;
 use account::Account;
 use blockchain::{Blockchain, Transaction};
 use connection::Connection;
+use rand::{rngs::OsRng, TryRngCore};
 
 use std::sync::{Arc, Mutex};
 
@@ -65,18 +66,22 @@ impl Node {
                 broadcast
                 put it into newpool
             */
+            let mut rng = OsRng;
             let new_transaction = Transaction {
                 sender: String::from("A"),
                 receiver: String::from("B"),
-                amount: 100,
-                fee: 1,
+                amount: rng.try_next_u64().unwrap() % 100,
+                fee: rng.try_next_u64().unwrap() % 10,
                 message: String::from("Hello"),
             };
-            self.blockchain
-                .mempool
-                .lock()
-                .unwrap()
-                .push(new_transaction);
+            // Put the transaction into mempool according to the fee (from large to small)
+            {
+                let mut mempool = self.blockchain.mempool.lock().unwrap();
+                let pos = mempool
+                    .binary_search_by(|tx| tx.fee.cmp(&new_transaction.fee).reverse())
+                    .unwrap_or_else(|e| e);
+                mempool.insert(pos, new_transaction);
+            }
             tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
         }
     }
@@ -89,9 +94,6 @@ impl Node {
 
     fn mining(&self) {
         loop {
-            // TODO: Mining
-            //   do the mining (get data from mempool, calculate, and update blockchain)
-            // TODO: Need a way to lock blockchain if we want to update it while receiving longer chain
             self.blockchain.mining();
         }
     }
