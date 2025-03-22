@@ -1,0 +1,7 @@
+[book]
+authors = ["ChenYing Kuo"]
+#language = "en"
+language = "zh-TW"
+multilingual = false
+src = "src"
+title = "用 Rust 打造屬於你的區塊鏈"
