@@ -12,7 +12,7 @@ pub struct Account {
 // Calculate SHA-256 => RIPEMD-160
 fn hash160(data: &[u8]) -> Vec<u8> {
     let sha256_hash = Sha256::digest(data);
-    Ripemd160::digest(&sha256_hash).to_vec()
+    Ripemd160::digest(sha256_hash).to_vec()
 }
 
 // Generate BTC address
@@ -21,7 +21,7 @@ fn generate_btc_address(pubkey_hash: Vec<u8>) -> String {
     extended_pubkey_hash.extend(pubkey_hash);
 
     // Calculate checksum (SHA256 x 2)
-    let checksum = &Sha256::digest(&Sha256::digest(&extended_pubkey_hash))[0..4];
+    let checksum = &Sha256::digest(Sha256::digest(&extended_pubkey_hash))[0..4];
 
     // Add checksum
     let mut address_bytes = extended_pubkey_hash.clone();
