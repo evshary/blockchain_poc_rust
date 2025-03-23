@@ -26,10 +26,9 @@ pre-commit install --install-hooks
 
 ## TODO
 
-* Adjust the difficulties
-* Use tokio
-* Add protobuf
+* Able to verify transactions with keys
 * Able to manage the account
+* Add protobuf
 * Able to communicate with other node
 * Implement CLI command
 * Support Zenoh
