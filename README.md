@@ -26,11 +26,9 @@ pre-commit install --install-hooks
 
 ## TODO
 
-* Able to verify transactions with keys
-* Able to manage the account
+* Implement CLI command
 * Add protobuf
 * Able to communicate with other node
-* Implement CLI command
 * Support Zenoh
-* Support PoS
 * Write tutorial
+* Support PoS

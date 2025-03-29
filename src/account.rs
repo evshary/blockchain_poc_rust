@@ -2,8 +2,10 @@ use std::fs;
 
 use base58::ToBase58;
 use ripemd::Ripemd160;
-use secp256k1::hashes::{sha256, Hash};
-use secp256k1::{Message, PublicKey, Secp256k1, SecretKey};
+use secp256k1::{
+    hashes::{sha256, Hash},
+    Message, PublicKey, Secp256k1, SecretKey,
+};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
@@ -141,7 +143,7 @@ impl Account {
         let digest = sha256::Hash::hash(message);
         let message = Message::from_digest(digest.to_byte_array());
 
-        let sig = secp.sign_ecdsa(&message, &private_key);
+        let sig = secp.sign_ecdsa(&message, private_key);
         sig.serialize_compact().to_vec()
     }
 
