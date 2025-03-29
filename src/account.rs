@@ -71,28 +71,6 @@ pub struct Account {
     pub private_key: SecretKey,
 }
 
-// Calculate SHA-256 => RIPEMD-160
-fn hash160(data: &[u8]) -> Vec<u8> {
-    let sha256_hash = Sha256::digest(data);
-    Ripemd160::digest(sha256_hash).to_vec()
-}
-
-// Generate address
-fn generate_address(pubkey_hash: Vec<u8>) -> String {
-    let mut extended_pubkey_hash = vec![0x00]; // Address prefix
-    extended_pubkey_hash.extend(pubkey_hash);
-
-    // Calculate checksum (SHA256 x 2)
-    let checksum = &Sha256::digest(Sha256::digest(&extended_pubkey_hash))[0..4];
-
-    // Add checksum
-    let mut address_bytes = extended_pubkey_hash.clone();
-    address_bytes.extend_from_slice(checksum);
-
-    // Base58 encode
-    address_bytes.to_base58()
-}
-
 impl Account {
     pub fn create(name: String) -> Account {
         let secp = Secp256k1::new();
@@ -104,17 +82,8 @@ impl Account {
         tracing::debug!("Private Key Hex: {:?}", private_key);
         tracing::debug!("Public Key Hex: {:?}", public_key);
 
-        // Calculate publish key HASH (SHA-256 + RIPEMD-160)
-        let pubkey_hash = hash160(&public_key.serialize());
-
-        tracing::debug!(
-            "Public key HASH (RIPEMD-160): {:?}",
-            hex::encode(&pubkey_hash)
-        );
-
         // Genearte address
-        let address = generate_address(pubkey_hash);
-
+        let address = Account::generate_address(&public_key.serialize());
         tracing::debug!("Address: {}", address);
 
         let account = Account {
@@ -132,6 +101,31 @@ impl Account {
 
     pub fn load(name: String) -> Account {
         AccountFile::load_account_from_file(&name)
+    }
+
+    /// Address format: 1 + 20 bytes + 4 bytes
+    ///  1 byte: Address prefix (0x00)
+    ///  20 bytes: Public key hash (RIPEMD-160)
+    ///  4 bytes: Checksum (SHA256 x 2)
+    /// Use base58 to encode the address
+    pub fn generate_address(pubkey: &[u8]) -> String {
+        // Calculate Public key hash (SHA-256 => RIPEMD-160)
+        let sha256_hash = Sha256::digest(pubkey);
+        let pubkey_hash = Ripemd160::digest(sha256_hash).to_vec();
+
+        // Address prefix is 0x00
+        let mut extended_pubkey_hash = vec![0x00];
+        extended_pubkey_hash.extend(pubkey_hash);
+
+        // Calculate checksum (SHA256 x 2)
+        let checksum = &Sha256::digest(Sha256::digest(&extended_pubkey_hash))[0..4];
+
+        // Add checksum
+        let mut address_bytes = extended_pubkey_hash.clone();
+        address_bytes.extend_from_slice(checksum);
+
+        // Base58 encode
+        address_bytes.to_base58()
     }
 
     // TODO: Able to sign data
