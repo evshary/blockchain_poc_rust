@@ -1,12 +1,74 @@
+use std::fs;
+
 use base58::ToBase58;
 use ripemd::Ripemd160;
 use secp256k1::{PublicKey, Secp256k1, SecretKey};
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AccountFile {
+    name: String,
+    address: String,
+    public_key_hex: String,
+    private_key_hex: String,
+}
+
+impl AccountFile {
+    fn save_account_to_file(account: &Account) {
+        let account_file = AccountFile {
+            name: account.name.clone(),
+            address: account.address.clone(),
+            public_key_hex: hex::encode(account.public_key.serialize()),
+            private_key_hex: hex::encode(account.private_key.secret_bytes()),
+        };
+
+        let filename = format!("{}.json", account.name);
+        let json =
+            serde_json::to_string_pretty(&account_file).expect("Unable serialize account to JSON");
+        fs::write(&filename, json).expect("Unable to write account to file");
+
+        tracing::info!(
+            "Account '{}' is stored into {} successfully!",
+            account.name,
+            filename
+        );
+    }
+
+    fn load_account_from_file(name: &String) -> Account {
+        let filename = format!("{}.json", name);
+        let data = fs::read_to_string(&filename).expect("Unable to read account file");
+        let loaded_account: AccountFile =
+            serde_json::from_str(&data).expect("Unable to parse account JSON");
+
+        // Extract the public key and private key from the loaded account
+        let private_key_bytes =
+            hex::decode(loaded_account.private_key_hex).expect("Hex decode failed");
+        let public_key_bytes =
+            hex::decode(loaded_account.public_key_hex).expect("Hex decode failed");
+        let private_key = SecretKey::from_slice(&private_key_bytes).expect("Invalid SecretKey");
+        let public_key = PublicKey::from_slice(&public_key_bytes).expect("Invalid PublicKey");
+
+        tracing::info!(
+            "Account '{}' is loaded from {} successfully!",
+            name,
+            filename
+        );
+
+        Account {
+            name: loaded_account.name,
+            address: loaded_account.address,
+            public_key,
+            private_key,
+        }
+    }
+}
+
 pub struct Account {
-    _name: String,
-    _pub_key: String,
-    _priv_key: String,
+    pub name: String,
+    pub address: String,
+    pub public_key: PublicKey,
+    pub private_key: SecretKey,
 }
 
 // Calculate SHA-256 => RIPEMD-160
@@ -15,9 +77,9 @@ fn hash160(data: &[u8]) -> Vec<u8> {
     Ripemd160::digest(sha256_hash).to_vec()
 }
 
-// Generate BTC address
-fn generate_btc_address(pubkey_hash: Vec<u8>) -> String {
-    let mut extended_pubkey_hash = vec![0x00]; // Bitcoin address prefix
+// Generate address
+fn generate_address(pubkey_hash: Vec<u8>) -> String {
+    let mut extended_pubkey_hash = vec![0x00]; // Address prefix
     extended_pubkey_hash.extend(pubkey_hash);
 
     // Calculate checksum (SHA256 x 2)
@@ -32,16 +94,15 @@ fn generate_btc_address(pubkey_hash: Vec<u8>) -> String {
 }
 
 impl Account {
-    // TODO: Able to write the account data to the file
     pub fn create(name: String) -> Account {
         let secp = Secp256k1::new();
 
         // Generate keys
-        let secret_key = SecretKey::new(&mut secp256k1::rand::thread_rng());
-        let public_key = PublicKey::from_secret_key(&secp, &secret_key);
+        let private_key = SecretKey::new(&mut secp256k1::rand::thread_rng());
+        let public_key = PublicKey::from_secret_key(&secp, &private_key);
 
-        tracing::debug!("Private key: {:?}", secret_key);
-        tracing::debug!("Public key: {:?}", public_key);
+        tracing::debug!("Private Key Hex: {:?}", private_key);
+        tracing::debug!("Public Key Hex: {:?}", public_key);
 
         // Calculate publish key HASH (SHA-256 + RIPEMD-160)
         let pubkey_hash = hash160(&public_key.serialize());
@@ -51,25 +112,26 @@ impl Account {
             hex::encode(&pubkey_hash)
         );
 
-        // Genearte BTC address
-        let address = generate_btc_address(pubkey_hash);
+        // Genearte address
+        let address = generate_address(pubkey_hash);
 
-        tracing::debug!("BTC Address: {}", address);
+        tracing::debug!("Address: {}", address);
 
-        Account {
-            _name: name,
-            _pub_key: String::new(),
-            _priv_key: String::new(),
-        }
+        let account = Account {
+            name,
+            address,
+            public_key,
+            private_key,
+        };
+
+        // Save the account to file
+        AccountFile::save_account_to_file(&account);
+
+        account
     }
 
-    // TODO: Able to read the account data from the file
     pub fn load(name: String) -> Account {
-        Account {
-            _name: name,
-            _pub_key: String::new(),
-            _priv_key: String::new(),
-        }
+        AccountFile::load_account_from_file(&name)
     }
 
     // TODO: Able to sign data
