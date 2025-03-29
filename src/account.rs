@@ -2,7 +2,8 @@ use std::fs;
 
 use base58::ToBase58;
 use ripemd::Ripemd160;
-use secp256k1::{PublicKey, Secp256k1, SecretKey};
+use secp256k1::hashes::{sha256, Hash};
+use secp256k1::{Message, PublicKey, Secp256k1, SecretKey};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
@@ -68,10 +69,11 @@ pub struct Account {
     pub name: String,
     pub address: String,
     pub public_key: PublicKey,
-    pub private_key: SecretKey,
+    private_key: SecretKey,
 }
 
 impl Account {
+    /// Create an account and write it to a file
     pub fn create(name: String) -> Account {
         let secp = Secp256k1::new();
 
@@ -99,15 +101,19 @@ impl Account {
         account
     }
 
+    /// Load an account from a file
     pub fn load(name: String) -> Account {
         AccountFile::load_account_from_file(&name)
     }
 
+    /// Generate a blockchain address from the public key
+    ///
     /// Address format: 1 + 20 bytes + 4 bytes
     ///  1 byte: Address prefix (0x00)
     ///  20 bytes: Public key hash (RIPEMD-160)
     ///  4 bytes: Checksum (SHA256 x 2)
     /// Use base58 to encode the address
+    ///
     pub fn generate_address(pubkey: &[u8]) -> String {
         // Calculate Public key hash (SHA-256 => RIPEMD-160)
         let sha256_hash = Sha256::digest(pubkey);
@@ -128,5 +134,26 @@ impl Account {
         address_bytes.to_base58()
     }
 
-    // TODO: Able to sign data
+    /// Sign a message with the private key
+    #[allow(dead_code)]
+    pub fn sign_message(&self, message: &[u8], private_key: &SecretKey) -> Vec<u8> {
+        let secp = Secp256k1::new();
+        let digest = sha256::Hash::hash(message);
+        let message = Message::from_digest(digest.to_byte_array());
+
+        let sig = secp.sign_ecdsa(&message, &private_key);
+        sig.serialize_compact().to_vec()
+    }
+
+    /// Verify a message with the public key
+    #[allow(dead_code)]
+    pub fn verfiy_signature(public_key: &PublicKey, message: &[u8], signature: &[u8]) -> bool {
+        let secp = Secp256k1::new();
+        let digest = sha256::Hash::hash(message);
+        let message = Message::from_digest(digest.to_byte_array());
+
+        let signature =
+            secp256k1::ecdsa::Signature::from_compact(signature).expect("Invalid signature format");
+        secp.verify_ecdsa(&message, &signature, public_key).is_ok()
+    }
 }
