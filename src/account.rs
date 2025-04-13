@@ -9,6 +9,31 @@ use secp256k1::{
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+pub struct AccountManager;
+impl AccountManager {
+    pub fn create_account(name: String) -> Account {
+        let account = Account::new(name);
+
+        AccountFile::save_account_to_file(&account);
+
+        account
+    }
+
+    pub fn load_account(name: String) -> Account {
+        AccountFile::load_account_from_file(&name)
+    }
+
+    pub fn print_accounts() {
+        let accounts = AccountFile::list_accounts();
+        for account in accounts.iter() {
+            println!("Account: {}", account.name);
+            println!("Address: {}", account.address);
+            println!("Public Key: {}", account.public_key);
+            println!();
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccountFile {
     name: String,
@@ -31,7 +56,7 @@ impl AccountFile {
             serde_json::to_string_pretty(&account_file).expect("Unable serialize account to JSON");
         fs::write(&filename, json).expect("Unable to write account to file");
 
-        tracing::info!(
+        tracing::debug!(
             "Account '{}' is stored into {} successfully!",
             account.name,
             filename
@@ -52,7 +77,7 @@ impl AccountFile {
         let private_key = SecretKey::from_slice(&private_key_bytes).expect("Invalid SecretKey");
         let public_key = PublicKey::from_slice(&public_key_bytes).expect("Invalid PublicKey");
 
-        tracing::info!(
+        tracing::debug!(
             "Account '{}' is loaded from {} successfully!",
             name,
             filename
@@ -65,6 +90,20 @@ impl AccountFile {
             private_key,
         }
     }
+
+    fn list_accounts() -> Vec<Account> {
+        let mut accounts = Vec::new();
+        let paths = fs::read_dir(".").expect("Unable to read directory");
+        for path in paths {
+            let path = path.expect("Unable to read path");
+            if path.path().extension().unwrap_or_default() == "json" {
+                let filename = path.file_name().into_string().unwrap();
+                let account_name = filename.trim_end_matches(".json").to_string();
+                accounts.push(AccountFile::load_account_from_file(&account_name));
+            }
+        }
+        accounts
+    }
 }
 
 pub struct Account {
@@ -76,7 +115,7 @@ pub struct Account {
 
 impl Account {
     /// Create an account and write it to a file
-    pub fn create(name: String) -> Account {
+    fn new(name: String) -> Account {
         let secp = Secp256k1::new();
 
         // Generate keys
@@ -97,15 +136,7 @@ impl Account {
             private_key,
         };
 
-        // Save the account to file
-        AccountFile::save_account_to_file(&account);
-
         account
-    }
-
-    /// Load an account from a file
-    pub fn load(name: String) -> Account {
-        AccountFile::load_account_from_file(&name)
     }
 
     /// Generate a blockchain address from the public key
