@@ -3,11 +3,11 @@ mod blockchain;
 mod connection;
 mod consensus;
 
-use clap::{Parser, Subcommand};
 use std::sync::{Arc, Mutex};
 
 use account::AccountManager;
 use blockchain::{Blockchain, Transaction};
+use clap::{Parser, Subcommand};
 use connection::Connection;
 use rand::{rngs::OsRng, TryRngCore};
 

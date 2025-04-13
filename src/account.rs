@@ -129,14 +129,12 @@ impl Account {
         let address = Account::generate_address(&public_key.serialize());
         tracing::debug!("Address: {}", address);
 
-        let account = Account {
+        Account {
             name,
             address,
             public_key,
             private_key,
-        };
-
-        account
+        }
     }
 
     /// Generate a blockchain address from the public key
