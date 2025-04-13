@@ -3,9 +3,10 @@ mod blockchain;
 mod connection;
 mod consensus;
 
+use clap::{Parser, Subcommand};
 use std::sync::{Arc, Mutex};
 
-use account::Account;
+use account::AccountManager;
 use blockchain::{Blockchain, Transaction};
 use connection::Connection;
 use rand::{rngs::OsRng, TryRngCore};
@@ -99,6 +100,55 @@ impl Node {
     }
 }
 
+/// Rust blockchain POC for wallet management and blockchain interaction
+#[derive(Parser)]
+#[command(
+    version = "0.1",
+    author = "CY",
+    about = "Rust blockchain POC for wallet management and blockchain interaction"
+)]
+struct Cli {
+    /// IP address to connect to
+    #[arg(short, long)]
+    connect: Option<String>,
+
+    /// IP address to listen on
+    #[arg(short, long)]
+    listen: Option<String>,
+
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// List all wallets
+    ListWallet,
+    /// Create a new wallet
+    CreateWallet {
+        /// The name of the wallet
+        account: String,
+    },
+    /// Get the balance of a wallet
+    GetBalance {
+        /// The account address to check balance
+        account: String,
+    },
+    /// Make a transaction
+    Transaction {
+        /// The sender's address
+        from_addr: String,
+        /// The recipient's address
+        to_addr: String,
+        /// The amount to send
+        amount: u64,
+    },
+    /// Run miner node
+    RunMiner { account: String },
+    /// Run pure node
+    RunNode,
+}
+
 #[tokio::main]
 async fn main() {
     // Initialize the logger
@@ -114,22 +164,48 @@ async fn main() {
     //   2. list account
     // Mining (need account)
     //   1. run Node
-    //   2. run Minor
+    //   2. run Miner
+    let args = Cli::parse();
 
-    // TODO: Create/Read account
-    let _account = Account::create("myaccount".to_string());
-    let _account = Account::load("myaccount".to_string());
-    // TODO: Initialize the connection and put it into Node
-    let _connection = Connection::new();
+    match args.command {
+        Commands::ListWallet => {
+            AccountManager::print_accounts();
+            return;
+        }
+        Commands::CreateWallet { account } => {
+            let account = AccountManager::create_account(account.to_string());
+            println!("Account {} is created.", account.name);
+            return;
+        }
+        Commands::GetBalance { account: _ } => {
+            // TODO
+        }
+        Commands::Transaction {
+            from_addr: _,
+            to_addr: _,
+            amount: _,
+        } => {
+            // TODO
+        }
+        Commands::RunMiner { account } => {
+            // TODO: Use the account to receive mining money
+            let _account = AccountManager::load_account(account);
+            // TODO: Initialize the connection and put it into Node
+            let _connection = Connection::new();
 
-    let node = Arc::new(Node::new());
+            let node = Arc::new(Node::new());
 
-    // Listening and Keepalive
-    let listening_node = node.clone();
-    tokio::spawn(async move { listening_node.listening().await });
-    let keep_alive_node = node.clone();
-    tokio::spawn(async move { keep_alive_node.keep_alive().await });
+            // Listening and Keepalive
+            let listening_node = node.clone();
+            tokio::spawn(async move { listening_node.listening().await });
+            let keep_alive_node = node.clone();
+            tokio::spawn(async move { keep_alive_node.keep_alive().await });
 
-    // Mining
-    node.mining();
+            // Mining
+            node.mining();
+        }
+        Commands::RunNode => {
+            // TODO
+        }
+    }
 }
