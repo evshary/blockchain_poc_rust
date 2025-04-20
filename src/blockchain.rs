@@ -107,7 +107,7 @@ impl Blockchain {
         balance
     }
 
-    pub fn mining(&self, miner_address: &String) {
+    pub fn mining(&self, miner_address: &str) {
         // Adjust the consensus
         self.consensus
             .write()
@@ -117,7 +117,7 @@ impl Blockchain {
         // Put the reward of the miner
         let mut transactions: Vec<_> = vec![Transaction {
             sender: String::from(""),
-            receiver: miner_address.clone(),
+            receiver: miner_address.to_owned(),
             amount: self.mining_reward,
             fee: 0,
             message: String::from("coinbase"),
