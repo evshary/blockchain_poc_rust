@@ -136,8 +136,8 @@ enum Commands {
     },
     /// Make a transaction
     Transaction {
-        /// The sender's address
-        from_addr: String,
+        /// The account to send
+        from_account: String,
         /// The recipient's address
         to_addr: String,
         /// The amount to send
@@ -145,8 +145,6 @@ enum Commands {
     },
     /// Run miner node
     RunMiner { account: String },
-    /// Run pure node
-    RunNode,
 }
 
 #[tokio::main]
@@ -154,17 +152,6 @@ async fn main() {
     // Initialize the logger
     tracing_subscriber::fmt::init();
 
-    // TODO: Able to parse CLI commands
-    // Send command (Need IP:port)
-    //   1. get balance
-    //   2. send money (need account)
-    //   3. get peer list
-    // Localhost
-    //   1. create account
-    //   2. list account
-    // Mining (need account)
-    //   1. run Node
-    //   2. run Miner
     let args = Cli::parse();
 
     match args.command {
@@ -181,7 +168,7 @@ async fn main() {
             // TODO
         }
         Commands::Transaction {
-            from_addr: _,
+            from_account: _,
             to_addr: _,
             amount: _,
         } => {
@@ -203,9 +190,6 @@ async fn main() {
 
             // Mining
             node.mining();
-        }
-        Commands::RunNode => {
-            // TODO
         }
     }
 }

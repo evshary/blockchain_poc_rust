@@ -26,7 +26,6 @@ pre-commit install --install-hooks
 
 ## TODO
 
-* Implement CLI command
 * Add protobuf
 * Able to communicate with other node
 * Support Zenoh
