@@ -95,7 +95,7 @@ impl Node {
 
     fn mining(&self, account: Account) {
         loop {
-            self.blockchain.mining(account.address.clone());
+            self.blockchain.mining(&account.address);
         }
     }
 }

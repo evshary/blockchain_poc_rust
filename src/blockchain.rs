@@ -89,7 +89,25 @@ impl Blockchain {
         // TODO: Return the same length of hash
     }
 
-    pub fn mining(&self, miner_address: String) {
+    #[allow(dead_code)]
+    pub fn get_balance(&self, address: &String) -> u64 {
+        // TODO: We don't need to check the whole blockchain.
+        //       We should only check the last one that the address sent out the money.
+        let mut balance: u64 = 0;
+        for block in self.blocks.read().unwrap().iter() {
+            for transaction in block.transactions.iter() {
+                if transaction.receiver == *address {
+                    balance += transaction.amount;
+                }
+                if transaction.sender == *address {
+                    balance -= transaction.amount;
+                }
+            }
+        }
+        balance
+    }
+
+    pub fn mining(&self, miner_address: &String) {
         // Adjust the consensus
         self.consensus
             .write()
@@ -99,7 +117,7 @@ impl Blockchain {
         // Put the reward of the miner
         let mut transactions: Vec<_> = vec![Transaction {
             sender: String::from(""),
-            receiver: miner_address,
+            receiver: miner_address.clone(),
             amount: self.mining_reward,
             fee: 0,
             message: String::from("coinbase"),
