@@ -5,7 +5,7 @@ mod consensus;
 
 use std::sync::{Arc, Mutex};
 
-use account::AccountManager;
+use account::{Account, AccountManager};
 use blockchain::{Blockchain, Transaction};
 use clap::{Parser, Subcommand};
 use connection::Connection;
@@ -93,9 +93,9 @@ impl Node {
         //   Put them into mempool
     }
 
-    fn mining(&self) {
+    fn mining(&self, account: Account) {
         loop {
-            self.blockchain.mining();
+            self.blockchain.mining(account.address.clone());
         }
     }
 }
@@ -176,7 +176,7 @@ async fn main() {
         }
         Commands::RunMiner { account } => {
             // TODO: Use the account to receive mining money
-            let _account = AccountManager::load_account(account);
+            let account = AccountManager::load_account(account);
             // TODO: Initialize the connection and put it into Node
             let _connection = Connection::new();
 
@@ -189,7 +189,7 @@ async fn main() {
             tokio::spawn(async move { keep_alive_node.keep_alive().await });
 
             // Mining
-            node.mining();
+            node.mining(account);
         }
     }
 }

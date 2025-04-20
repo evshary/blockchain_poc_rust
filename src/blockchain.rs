@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::consensus::Consensus;
 
 const TRANSACTION_PER_BLOCK: usize = 32;
+const MINER_INITIAL_REWARD: u64 = 50;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Transaction {
@@ -46,7 +47,7 @@ impl Block {
 
 pub struct Blockchain {
     pub blocks: RwLock<Vec<Block>>,
-    pub _mining_reward: u64,
+    pub mining_reward: u64,
     pub consensus: RwLock<Consensus>,
     pub mempool: Mutex<Vec<Transaction>>,
 }
@@ -61,7 +62,8 @@ impl Blockchain {
 
         Blockchain {
             blocks: RwLock::new(vec![genesis_block]),
-            _mining_reward: 0,
+            // TODO: We need a way to adjust the reward
+            mining_reward: MINER_INITIAL_REWARD,
             consensus: RwLock::new(consensus),
             mempool: Mutex::new(Vec::new()),
         }
@@ -87,20 +89,30 @@ impl Blockchain {
         // TODO: Return the same length of hash
     }
 
-    pub fn mining(&self) {
+    pub fn mining(&self, miner_address: String) {
         // Adjust the consensus
         self.consensus
             .write()
             .unwrap()
             .adjust(&self.blocks.read().unwrap());
 
+        // Put the reward of the miner
+        let mut transactions: Vec<_> = vec![Transaction {
+            sender: String::from(""),
+            receiver: miner_address,
+            amount: self.mining_reward,
+            fee: 0,
+            message: String::from("coinbase"),
+        }];
+
         // Put the transaction into it
         // TODO: Check the balance of the sender
-        let transactions: Vec<_> = {
+        let accept_transaction: Vec<_> = {
             let mut lock = self.mempool.lock().unwrap();
             let size = TRANSACTION_PER_BLOCK.min(lock.len());
             lock.drain(..size).collect()
         };
+        transactions.extend(accept_transaction);
         println!("Transactions: {:?}", transactions);
         let mut block = Block::new(
             self.blocks.read().unwrap().last().unwrap().hash.clone(),
