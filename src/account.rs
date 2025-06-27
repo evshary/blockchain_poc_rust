@@ -64,7 +64,7 @@ impl AccountFile {
     }
 
     fn load_account_from_file(name: &String) -> Account {
-        let filename = format!("{}.json", name);
+        let filename = format!("{name}.json");
         let data = fs::read_to_string(&filename).expect("Unable to read account file");
         let loaded_account: AccountFile =
             serde_json::from_str(&data).expect("Unable to parse account JSON");

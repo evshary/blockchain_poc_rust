@@ -131,7 +131,7 @@ impl Blockchain {
             lock.drain(..size).collect()
         };
         transactions.extend(accept_transaction);
-        println!("Transactions: {:?}", transactions);
+        println!("Transactions: {transactions:?}");
         let mut block = Block::new(
             self.blocks.read().unwrap().last().unwrap().hash.clone(),
             transactions,

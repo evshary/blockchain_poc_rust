@@ -26,7 +26,7 @@ impl Consensus {
         hasher.update(encoded);
         let result = hasher.finalize();
 
-        format!("{:x}", result)
+        format!("{result:x}")
     }
 
     #[allow(dead_code)]
